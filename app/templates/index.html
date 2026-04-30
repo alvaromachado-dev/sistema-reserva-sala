@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- 🔔 MENSAGENS (FLASH UX) -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages %}
+<div class="alert"
+     style="background:#1f2937; border:1px solid #374151; color:#fff; border-radius:10px;">
+    {{ msg }}
+</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+
+    <!-- 📌 FORMULÁRIO -->
+    <div class="col-md-4">
+
+        <div class="card p-3 mb-3">
+
+            <h5>📌 Nova reserva</h5>
+
+            <form method="POST">
+
+                <label class="mb-1">Data</label>
+                <input type="date" class="form-control mb-2" name="data" required>
+
+                <label class="mb-1">Início</label>
+                <input type="time" class="form-control mb-2" name="inicio" required>
+
+                <label class="mb-1">Fim</label>
+                <input type="time" class="form-control mb-2" name="fim" required>
+
+                <label class="mb-1">Descrição (opcional)</label>
+                <input type="text"
+                       class="form-control mb-3"
+                       name="descricao"
+                       placeholder="Ex: Reunião com time de TI">
+
+                <button class="btn btn-primary w-100">
+                    Reservar
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- 📋 LISTA DE RESERVAS -->
+    <div class="col-md-8">
+
+        <div class="card p-3">
+
+            <h5>📋 Reservas da sala</h5>
+
+            {% for r in reservas %}
+
+            <div class="border-bottom py-3">
+
+                <!-- 📅 DATA + HORÁRIO -->
+                <div>
+                    <span class="badge bg-primary">{{ r.data }}</span>
+
+                    <span class="ms-2">
+                        {{ r.hora_inicio }} → {{ r.hora_fim }}
+                    </span>
+                </div>
+
+                <!-- 👤 USUÁRIO -->
+                <div class="mt-1 text-info">
+                    👤 {{ r.user.username }}
+                </div>
+
+                <!-- 📝 DESCRIÇÃO -->
+                {% if r.descricao %}
+                <div class="text-muted mt-1">
+                    📝 {{ r.descricao }}
+                </div>
+                {% endif %}
+
+                <!-- 🗑️ AÇÃO -->
+                <div class="mt-2">
+                    <a href="/delete/{{r.id}}" class="btn btn-sm btn-danger">
+                        Excluir
+                    </a>
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
