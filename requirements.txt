@@ -1,5 +1,5 @@
 Flask
 Flask-Login
 Flask-SQLAlchemy
-mysql-connector-python
+psycopg2-binary
 Werkzeug

@@ -22,7 +22,7 @@ def garantir_coluna_sala(app):
 
 def esperar_banco(app, db, tentativas=20, delay=3):
     """
-    Aguarda o MySQL ficar pronto antes de inicializar o app.
+    Aguarda o banco ficar pronto antes de inicializar o app.
     Essencial em Docker.
     """
     for tentativa in range(tentativas):
@@ -54,14 +54,20 @@ def create_app():
         SESSION_COOKIE_SAMESITE="Lax"
     )
 
-    # 🗄️ banco MySQL (Docker-friendly)
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"mysql+mysqlconnector://"
-        f"{os.getenv('DB_USER')}:"
-        f"{os.getenv('DB_PASSWORD')}@"
-        f"{os.getenv('DB_HOST')}/"
-        f"{os.getenv('DB_NAME')}"
-    )
+    # 🗄️ banco PostgreSQL/Supabase
+    database_url = os.getenv('DATABASE_URL') or os.getenv('SUPABASE_DB_URL')
+    if database_url:
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = (
+            f"postgresql+psycopg2://"
+            f"{os.getenv('DB_USER', 'postgres')}:"
+            f"{os.getenv('DB_PASSWORD', 'postgres')}@"
+            f"{os.getenv('DB_HOST', 'localhost')}/"
+            f"{os.getenv('DB_NAME', 'sala_reuniao')}"
+        )
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
