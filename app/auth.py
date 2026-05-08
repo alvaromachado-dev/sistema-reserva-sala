@@ -13,9 +13,11 @@ def load_user(user_id):
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user = User.query.filter_by(username=request.form["username"]).first()
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        user = User.query.filter_by(username=username).first()
 
-        if user and check_password_hash(user.password, request.form["password"]):
+        if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect("/")
 
