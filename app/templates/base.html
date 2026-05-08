@@ -246,6 +246,7 @@
 
         <div>
             {% if current_user.is_authenticated %}
+                <a href="/change-password" class="btn btn-outline-warning me-2">🔐 Alterar Senha</a>
                 {% if current_user.is_admin %}
                     <a href="/users" class="btn btn-outline-light me-2">👤 Gerenciar Usuários</a>
                 {% endif %}

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
 from flask_login import login_required, current_user
 from datetime import datetime
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from .models import db, Reserva, User
 from .config import SALAS_DISPONIVEIS
@@ -66,7 +66,7 @@ def index():
         flash("✅ Reserva criada com sucesso!")
         return redirect('/')
 
-    # � busca e exibição de reservas
+    # 🔍 busca e exibição de reservas
     search_description = request.args.get('search_description', '').strip()
     search_user = request.args.get('search_user', '').strip()
     search_date = request.args.get('search_date', '').strip()
@@ -217,4 +217,61 @@ def delete_user(id):
     db.session.delete(user)
     db.session.commit()
     flash("🗑️ Usuário excluído com sucesso.")
+    return redirect('/users')
+
+
+@main.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        if not check_password_hash(current_user.password, current_password):
+            flash("❌ Senha atual incorreta.")
+            return render_template('change_password.html')
+
+        if new_password != confirm_password:
+            flash("❌ As senhas novas não coincidem.")
+            return render_template('change_password.html')
+
+        if new_password == current_password:
+            flash("❌ A nova senha deve ser diferente da senha atual.")
+            return render_template('change_password.html')
+
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+        flash("✅ Senha alterada com sucesso!")
+        return redirect('/')
+
+    return render_template('change_password.html')
+
+
+@main.route('/users/change-password/<int:id>', methods=['POST'])
+@login_required
+def admin_change_user_password(id):
+    if not current_user.is_admin:
+        flash("❌ Acesso negado. Apenas administradores podem alterar senhas.")
+        return redirect('/users')
+
+    if current_user.id == id:
+        flash("❌ Para alterar sua própria senha, use a opção de perfil.")
+        return redirect('/users')
+
+    user = User.query.get(id)
+    if not user:
+        flash("❌ Usuário não encontrado.")
+        return redirect('/users')
+
+    new_password = request.form['new_password']
+    confirm_password = request.form['confirm_password']
+
+    if new_password != confirm_password:
+        flash("❌ As senhas não coincidem.")
+        return redirect('/users')
+
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+    flash(f"✅ Senha de {user.username} alterada com sucesso!")
     return redirect('/users')

@@ -87,6 +87,14 @@
                     {% if current_user.id != user.id %}
                     <div>
                         <button type="button"
+                                class="btn btn-sm btn-warning"
+                                data-bs-toggle="modal"
+                                data-bs-target="#changePasswordModal"
+                                data-user-id="{{ user.id }}"
+                                data-user-name="{{ user.username }}">
+                            Alterar Senha
+                        </button>
+                        <button type="button"
                                 class="btn btn-sm btn-danger"
                                 data-bs-toggle="modal"
                                 data-bs-target="#confirmDeleteModal"
@@ -127,6 +135,35 @@
 </div>
 </form>
 
+<!-- Modal de alterar senha -->
+<form id="changePasswordForm" method="post">
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-secondary">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordModalLabel">Alterar Senha</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">Alterando senha de <strong id="changePasswordUserName"></strong></p>
+        <div class="mb-3">
+          <label class="form-label text-muted">Nova Senha</label>
+          <input type="password" class="form-control" name="new_password" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted">Confirmar Senha</label>
+          <input type="password" class="form-control" name="confirm_password" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-warning">Alterar Senha</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
 <script>
   const confirmDeleteModal = document.getElementById('confirmDeleteModal');
   const deleteUserForm = document.getElementById('deleteUserForm');
@@ -139,6 +176,23 @@
 
       deleteUserName.textContent = userName;
       deleteUserForm.setAttribute('action', '/users/delete/' + userId);
+    });
+  }
+
+  const changePasswordModal = document.getElementById('changePasswordModal');
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  if (changePasswordModal && changePasswordForm) {
+    changePasswordModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const userId = button.getAttribute('data-user-id');
+      const userName = button.getAttribute('data-user-name');
+      const changePasswordUserName = document.getElementById('changePasswordUserName');
+
+      changePasswordUserName.textContent = userName;
+      changePasswordForm.setAttribute('action', '/users/change-password/' + userId);
+      // Limpar campos
+      changePasswordForm.querySelector('input[name="new_password"]').value = '';
+      changePasswordForm.querySelector('input[name="confirm_password"]').value = '';
     });
   }
 </script>
