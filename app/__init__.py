@@ -32,8 +32,8 @@ def esperar_banco(app, db, tentativas=20, delay=3):
                 garantir_coluna_sala(app)
             print("✅ Banco conectado e tabelas criadas!")
             return
-        except (OperationalError, SQLAlchemyError):
-            print(f"⏳ Aguardando banco... tentativa {tentativa + 1}/{tentativas}")
+        except (OperationalError, SQLAlchemyError) as exc:
+            print(f"⏳ Aguardando banco... tentativa {tentativa + 1}/{tentativas} — {type(exc).__name__}: {exc}")
             time.sleep(delay)
 
     raise Exception("❌ Banco de dados indisponível")
@@ -59,6 +59,9 @@ def create_app():
     if database_url:
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        if 'supabase.co' in database_url and 'sslmode=' not in database_url:
+            separator = '&' if '?' in database_url else '?'
+            database_url = f"{database_url}{separator}sslmode=require"
         app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = (
