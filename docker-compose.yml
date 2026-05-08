@@ -19,6 +19,7 @@ services:
   web:
     build: .
     container_name: sala_web
+    restart: on-failure
     ports:
       - "5000:5000"
     depends_on:

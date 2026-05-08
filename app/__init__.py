@@ -3,13 +3,24 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import os
 import time
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
+from sqlalchemy import inspect, text
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 
 
-def esperar_banco(app, db, tentativas=10, delay=3):
+def garantir_coluna_sala(app):
+    insp = inspect(db.engine)
+    if 'reserva' in insp.get_table_names():
+        colunas = [col['name'] for col in insp.get_columns('reserva')]
+        if 'sala' not in colunas:
+            with db.engine.begin() as conn:
+                conn.execute(text("ALTER TABLE reserva ADD COLUMN sala VARCHAR(100) NOT NULL DEFAULT 'Sala de reunião - Miguel'"))
+            print("✅ Coluna 'sala' adicionada na tabela reserva")
+
+
+def esperar_banco(app, db, tentativas=20, delay=3):
     """
     Aguarda o MySQL ficar pronto antes de inicializar o app.
     Essencial em Docker.
@@ -18,9 +29,10 @@ def esperar_banco(app, db, tentativas=10, delay=3):
         try:
             with app.app_context():
                 db.create_all()
+                garantir_coluna_sala(app)
             print("✅ Banco conectado e tabelas criadas!")
             return
-        except OperationalError:
+        except (OperationalError, SQLAlchemyError):
             print(f"⏳ Aguardando banco... tentativa {tentativa + 1}/{tentativas}")
             time.sleep(delay)
 
@@ -73,5 +85,20 @@ def create_app():
     # 🧠 garante banco pronto antes do app rodar
     with app.app_context():
         esperar_banco(app, db)
+
+        # Criar usuário admin se não existir
+        from .models import User
+        from werkzeug.security import generate_password_hash
+        admin = User.query.filter_by(username='Alvaro Machado').first()
+        if not admin:
+            admin = User(
+                username='Alvaro Machado',
+                password=generate_password_hash('admin123'),  # senha padrão, pode mudar
+                cargo='Administrador',
+                setor='TI',
+                is_admin=True
+            )
+            db.session.add(admin)
+            db.session.commit()
 
     return app

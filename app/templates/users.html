@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- 🔔 MENSAGENS (FLASH UX) -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages %}
+<div class="alert"
+     style="background:#1f2937; border:1px solid #374151; color:#fff; border-radius:10px;">
+    {{ msg }}
+</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="row g-4">
+
+    <!-- 📌 FORMULÁRIO DE CADASTRO -->
+    <div class="col-lg-4">
+
+        <div class="card p-4">
+            <div class="mb-3">
+                <h5 class="page-title mb-1">👤 Novo usuário</h5>
+                <p class="text-muted mb-0">Crie acessos para sua equipe com cargos e setores definidos.</p>
+            </div>
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Usuário</label>
+                    <input type="text" class="form-control" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Senha</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Cargo</label>
+                    <input type="text" class="form-control" name="cargo">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Setor</label>
+                    <input type="text" class="form-control" name="setor">
+                </div>
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+                    <label class="form-check-label text-muted" for="is_admin">Administrador</label>
+                </div>
+                <button class="btn btn-primary w-100">Cadastrar</button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- 📋 LISTA DE USUÁRIOS -->
+    <div class="col-lg-8">
+
+        <div class="card p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+                <div>
+                    <h5 class="page-title mb-1">📋 Usuários cadastrados</h5>
+                    <p class="text-muted mb-0">Gerencie contas ativas e privilégios administrativos.</p>
+                </div>
+            </div>
+
+            {% for user in users %}
+            <div class="card p-3 mb-3 bg-[#111827] border border-slate-700">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <strong>{{ user.username }}</strong>
+                            {% if user.is_admin %}
+                            <span class="badge bg-danger">Admin</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted">{{ user.cargo or 'Cargo não informado' }}</div>
+                        <div class="text-muted">{{ user.setor or 'Setor não informado' }}</div>
+                    </div>
+
+                    {% if current_user.id != user.id %}
+                    <div>
+                        <button type="button"
+                                class="btn btn-sm btn-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal"
+                                data-user-id="{{ user.id }}"
+                                data-user-name="{{ user.username }}">
+                            Excluir
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal de confirmação -->
+<form id="deleteUserForm" method="post">
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-secondary">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar exclusão</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza de que deseja excluir o usuário <strong id="deleteUserName"></strong>? Esta ação não pode ser desfeita.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
+<script>
+  const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+  const deleteUserForm = document.getElementById('deleteUserForm');
+  if (confirmDeleteModal && deleteUserForm) {
+    confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const userId = button.getAttribute('data-user-id');
+      const userName = button.getAttribute('data-user-name');
+      const deleteUserName = document.getElementById('deleteUserName');
+
+      deleteUserName.textContent = userName;
+      deleteUserForm.setAttribute('action', '/users/delete/' + userId);
+    });
+  }
+</script>
+
+{% endblock %}

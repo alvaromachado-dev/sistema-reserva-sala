@@ -21,16 +21,6 @@ def login():
 
     return render_template("login.html")
 
-@auth.route("/register", methods=["POST"])
-def register():
-    user = User(
-        username=request.form["username"],
-        password=generate_password_hash(request.form["password"])
-    )
-    db.session.add(user)
-    db.session.commit()
-    return redirect("/login")
-
 @auth.route("/logout")
 @login_required
 def logout():

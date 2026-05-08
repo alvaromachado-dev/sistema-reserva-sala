@@ -6,22 +6,21 @@
     <div class="col-md-4">
 
         <div class="card p-4">
-            <h4 class="mb-3">🔐 Login</h4>
+            <div class="mb-4">
+                <h4 class="mb-1 page-title">🔐 Acesso seguro</h4>
+                <p class="text-muted mb-0">Entre com seu usuário e senha para acessar o painel de reservas.</p>
+            </div>
 
             <form method="POST">
-                <input class="form-control mb-2" name="username" placeholder="Usuário">
-                <input class="form-control mb-3" type="password" name="password" placeholder="Senha">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Usuário</label>
+                    <input class="form-control" name="username" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-muted">Senha</label>
+                    <input class="form-control" type="password" name="password" placeholder="Digite sua senha" required>
+                </div>
                 <button class="btn btn-primary w-100">Entrar</button>
-            </form>
-
-            <hr>
-
-            <h6>Criar conta</h6>
-
-            <form action="/register" method="POST">
-                <input class="form-control mb-2" name="username" placeholder="Usuário">
-                <input class="form-control mb-2" type="password" name="password" placeholder="Senha">
-                <button class="btn btn-secondary w-100">Registrar</button>
             </form>
         </div>
 

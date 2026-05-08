@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <div class="card p-4">
+            <h4 class="mb-3">✏️ Editar Reserva</h4>
+
+            <form method="POST">
+
+                <label class="mb-1">Sala</label>
+                <select class="form-control mb-2" name="sala" required>
+                    {% for sala in salas_disponiveis %}
+                    <option value="{{ sala }}" {% if reserva.sala == sala %}selected{% endif %}>{{ sala }}</option>
+                    {% endfor %}
+                </select>
+
+                <label class="mb-1">Data</label>
+                <input type="date" class="form-control mb-2" name="data" required value="{{ reserva.data }}">
+
+                <label class="mb-1">Início</label>
+                <input type="time" class="form-control mb-2" name="inicio" required value="{{ reserva.hora_inicio }}">
+
+                <label class="mb-1">Fim</label>
+                <input type="time" class="form-control mb-2" name="fim" required value="{{ reserva.hora_fim }}">
+
+                <label class="mb-1">Descrição (opcional)</label>
+                <input type="text"
+                       class="form-control mb-3"
+                       name="descricao"
+                       value="{{ reserva.descricao }}"
+                       placeholder="Ex: Reunião com time de TI">
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary w-100" type="submit">Salvar</button>
+                    <a href="/" class="btn btn-secondary w-100">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
